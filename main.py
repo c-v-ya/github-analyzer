@@ -3,6 +3,8 @@ import json
 import logging
 from datetime import datetime
 
+from requests import RequestException
+
 from src.analyzer import Analyzer
 
 log = logging.getLogger(__name__)
@@ -42,12 +44,18 @@ def run():
     date_to = args.date_to
     branch = args.branch
 
-    result = Analyzer(
+    analyzer = Analyzer(
         repo=repo,
         date_from=date_from,
         date_to=date_to,
         branch=branch,
-    ).get_stats()
+    )
+
+    result = {}
+    try:
+        result = analyzer.get_stats()
+    except RequestException as e:
+        log.error(f'Error getting stats: {e}')
 
     log.info(json.dumps(result, indent=2))
 
